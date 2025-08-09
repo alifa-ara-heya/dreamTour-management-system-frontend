@@ -1,3 +1,4 @@
+import { Outlet } from "react-router";
 import "./App.css";
 import { Button } from "./components/ui/button";
 
@@ -6,6 +7,7 @@ function App() {
     <>
       <h1>DreamTour management System</h1>
       <Button>Click me</Button>
+      <Outlet />
     </>
   );
 }
