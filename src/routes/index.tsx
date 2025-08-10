@@ -13,4 +13,14 @@ export const router = createBrowserRouter([
       },
     ],
   },
+  /*  {
+    path: "/admin",
+    Component: AdminLayout,
+    children: [
+      {
+        path: "analytics",
+        Component: Analytics,
+      },
+    ],
+  }, */
 ]);
