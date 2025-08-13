@@ -1,5 +1,6 @@
 // import Logo from "@/components/navbar-components/logo";
 
+import { cn } from "@/lib/utils";
 import Logo from "@/assets/icons/Logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ModeToggle } from "./ModeToggler";
-import { Link } from "react-router";
+import { Link, NavLink } from "react-router";
 
 // Navigation links array to be used in both desktop and mobile menus
 const navigationLinks = [
@@ -68,8 +69,15 @@ export default function Navbar() {
                 <NavigationMenuList className="flex-col items-start gap-0 md:gap-2">
                   {navigationLinks.map((link, index) => (
                     <NavigationMenuItem key={index} className="w-full">
-                      <NavigationMenuLink asChild className="py-1.5">
-                        <Link to={link.href}>{link.label}</Link>
+                      <NavigationMenuLink asChild>
+                        <NavLink
+                          to={link.href}
+                          className={({ isActive }) =>
+                            cn("block w-full py-1.5", isActive && "font-bold")
+                          }
+                        >
+                          {link.label}
+                        </NavLink>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                   ))}
@@ -87,11 +95,18 @@ export default function Navbar() {
               <NavigationMenuList className="gap-2">
                 {navigationLinks.map((link, index) => (
                   <NavigationMenuItem key={index}>
-                    <NavigationMenuLink
-                      asChild
-                      className="text-muted-foreground hover:text-primary py-1.5 font-medium"
-                    >
-                      <Link to={link.href}>{link.label}</Link>
+                    <NavigationMenuLink asChild>
+                      <NavLink
+                        to={link.href}
+                        className={({ isActive }) =>
+                          cn(
+                            "py-1.5 font-medium text-muted-foreground transition-colors hover:text-primary",
+                            isActive && "text-primary"
+                          )
+                        }
+                      >
+                        {link.label}
+                      </NavLink>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                 ))}
