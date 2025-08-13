@@ -15,20 +15,28 @@ import { useForm } from "react-hook-form";
 import { Link } from "react-router";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import InputPassword from "@/components/ui/inputPassword";
 
-const registerSchema = z.object({
-  username: z
-    .string()
-    .min(3, {
-      message: "Username must be at least 3 characters.",
-    })
-    .max(50),
-  email: z.email(),
-  password: z.string().min(6, "The password should be minimum 6 characters."),
-  confirmPassword: z
-    .string()
-    .min(6, "The password should be minimum 6 characters."),
-});
+const registerSchema = z
+  .object({
+    username: z
+      .string()
+      .min(3, {
+        error: "Username must be at least 3 characters.",
+      })
+      .max(50, {
+        error: "Username can not be more than 50 characters.",
+      }),
+    email: z.email(),
+    password: z.string().min(6, {
+      error: "The password should be minimum 6 characters.",
+    }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 export function RegisterForm({
   className,
@@ -112,7 +120,8 @@ export function RegisterForm({
                 <FormItem className="grid gap-2">
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" {...field} />
+                    {/* <Input type="password" {...field} /> */}
+                    <InputPassword {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -127,7 +136,8 @@ export function RegisterForm({
                 <FormItem className="grid gap-2">
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input type="password" {...field} />
+                    {/* <Input type="password" {...field} /> */}
+                    <InputPassword {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
