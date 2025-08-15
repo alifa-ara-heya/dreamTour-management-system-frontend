@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { Link } from "react-router";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import InputPassword from "@/components/ui/inputPassword";
+import InputPassword from "@/components/ui/InputPassword";
 
 const registerSchema = z
   .object({
