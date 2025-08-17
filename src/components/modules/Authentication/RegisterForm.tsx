@@ -16,6 +16,8 @@ import { Link } from "react-router";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import InputPassword from "@/components/ui/InputPassword";
+import { useRegisterMutation } from "@/redux/features/auth/auth.api";
+import { toast } from "sonner";
 
 const registerSchema = z
   .object({
@@ -52,9 +54,25 @@ export function RegisterForm({
     },
   });
 
-  const onSubmit = (data: z.infer<typeof registerSchema>) => {
+  const [register] = useRegisterMutation();
+
+  const onSubmit = async (data: z.infer<typeof registerSchema>) => {
     // TODO: Implement form submission logic, e.g., API call
-    console.log(data);
+    // console.log(data);
+
+    const userInfo = {
+      name: data.username,
+      email: data.email,
+      password: data.password,
+    };
+
+    try {
+      const result = await register(userInfo).unwrap();
+      console.log(result);
+      toast.success("User created successfully!");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
