@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Link } from "react-router";
-import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form";
+import { toast } from "sonner";
+import { Link, useNavigate } from "react-router";
+import { useForm } from "react-hook-form";
 import { useLoginMutation } from "@/redux/features/auth/auth.api";
+import { zodResolver } from "@hookform/resolvers/zod";
 import googleLogo from "@/assets/icons/google-logo.svg";
 import {
   Form,
@@ -14,19 +15,41 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.email({ error: "Please enter a valid email address." }),
+  password: z.string().min(1, { error: "Password is required." }),
+});
 
 export function LoginForm({
   className,
   ...props
-}: React.ComponentProps<"form">) {
-  const form = useForm();
+}: React.HTMLAttributes<HTMLDivElement>) {
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
   const [login] = useLoginMutation();
-  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+  const navigate = useNavigate();
+  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
       const res = await login(data).unwrap();
       console.log(res);
+      toast.success("Logged in successfully");
     } catch (error) {
-      console.error(error);
+      if (error.data.err.statusCode === 401) {
+        toast.error("Your account is not verified.");
+        navigate("/verify");
+      } else {
+        toast.error(error.data.message);
+      }
+      console.error(error.data);
+      //
+      // toast.error(error.data.message);
     }
   };
 
@@ -48,11 +71,7 @@ export function LoginForm({
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="john@example.com"
-                      {...field}
-                      value={field.value || ""}
-                    />
+                    <Input placeholder="john@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -66,12 +85,7 @@ export function LoginForm({
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="********"
-                      {...field}
-                      value={field.value || ""}
-                    />
+                    <Input type="password" placeholder="********" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

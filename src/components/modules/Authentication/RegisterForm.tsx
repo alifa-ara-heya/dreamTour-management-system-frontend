@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import InputPassword from "@/components/ui/InputPassword";
@@ -55,6 +55,7 @@ export function RegisterForm({
   });
 
   const [register] = useRegisterMutation();
+  const navigate = useNavigate();
 
   const onSubmit = async (data: z.infer<typeof registerSchema>) => {
     // TODO: Implement form submission logic, e.g., API call
@@ -69,10 +70,11 @@ export function RegisterForm({
     try {
       const result = await register(userInfo).unwrap();
       console.log(result);
-      toast.success("User created successfully!");
+      toast.success("User created successfully! Verify your account");
+      navigate("/verify");
     } catch (error) {
-      console.error(error.data);
-      toast.error(error.data.message);
+      console.error(error?.data);
+      toast.error(error?.data?.message);
     }
   };
 
