@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Link, useNavigate } from "react-router";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form";
 import { useLoginMutation } from "@/redux/features/auth/auth.api";
-import { zodResolver } from "@hookform/resolvers/zod";
-import googleLogo from "@/assets/icons/google-logo.svg";
+// import { zodResolver } from "@hookform/resolvers/zod";
+// import googleLogo from "@/assets/icons/google-logo.svg";
 import {
   Form,
   FormControl,
@@ -15,41 +15,46 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { z } from "zod";
+import config from "@/config";
+// import { z } from "zod";
 
-const loginSchema = z.object({
-  email: z.email({ error: "Please enter a valid email address." }),
-  password: z.string().min(1, { error: "Password is required." }),
-});
+// const loginSchema = z.object({
+//   email: z.email({ error: "Please enter a valid email address." }),
+//   password: z.string().min(1, { error: "Password is required." }),
+// });
 
 export function LoginForm({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+  const navigate = useNavigate();
+  const form = useForm({
+    //! For development only
     defaultValues: {
-      email: "",
-      password: "",
+      email: "alifaaraheya@gmail.com",
+      password: "Abc@123",
     },
   });
   const [login] = useLoginMutation();
-  const navigate = useNavigate();
-  const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     try {
       const res = await login(data).unwrap();
-      console.log(res);
-      toast.success("Logged in successfully");
-    } catch (error) {
-      if (error.data.err.statusCode === 401) {
-        toast.error("Your account is not verified.");
-        navigate("/verify");
-      } else {
-        toast.error(error.data.message);
+      if (res.success) {
+        toast.success("Logged in successfully");
+        navigate("/");
       }
-      console.error(error.data);
-      //
-      // toast.error(error.data.message);
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+
+      if (err.data.message === "Password does not match") {
+        toast.error("Invalid credentials");
+      }
+
+      if (err.data.message === "User is not verified") {
+        toast.error("Your account is not verified");
+        navigate("/verify", { state: data.email });
+      }
     }
   };
 
@@ -57,7 +62,7 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your account</h1>
-        <p className="text-muted-foreground text-sm text-balance">
+        <p className="text-balance text-sm text-muted-foreground">
           Enter your email below to login to your account
         </p>
       </div>
@@ -71,7 +76,11 @@ export function LoginForm({
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="john@example.com" {...field} />
+                    <Input
+                      placeholder="john@example.com"
+                      {...field}
+                      value={field.value || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -85,7 +94,12 @@ export function LoginForm({
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="********" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="********"
+                      {...field}
+                      value={field.value || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -98,21 +112,24 @@ export function LoginForm({
           </form>
         </Form>
 
-        {/* login with google */}
-        <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-          <span className="bg-background text-muted-foreground relative z-10 px-2">
+        <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+          <span className="relative z-10 bg-background px-2 text-muted-foreground">
             Or continue with
           </span>
         </div>
-        <Button variant="outline" className="w-full">
-          <img src={googleLogo} alt="" className="w-5 h-5" />
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full cursor-pointer"
+          onClick={() => window.open(`${config.baseUrl}/auth/google`)}
+        >
           Login with Google
         </Button>
       </div>
-
       <div className="text-center text-sm">
         Don&apos;t have an account?{" "}
-        <Link to="/register" className="underline underline-offset-4">
+        <Link to="/register" replace className="underline underline-offset-4">
           Register
         </Link>
       </div>
